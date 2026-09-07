@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { EMPTY_PROFILE, type Opportunity, type StudentProfile } from "./types";
+import {
+  EMPTY_PROFILE,
+  type Account,
+  type ExplanationRating,
+  type Opportunity,
+  type StudentProfile,
+} from "./types";
 import { stripControlChars } from "./sanitize";
 
 /**
@@ -26,7 +32,10 @@ const stringList = (max: number) =>
 
 export const profileSchema = z.object({
   name: clean(LIMITS.shortText),
-  degree: clean(LIMITS.shortText),
+  major: clean(LIMITS.shortText).catch(""),
+  minor: clean(LIMITS.shortText).catch(""),
+  // Optional so profiles saved before the major/minor dropdowns existed still parse.
+  degree: clean(LIMITS.shortText).optional(),
   courses: stringList(LIMITS.shortText),
   skills: stringList(LIMITS.shortText),
   projects: stringList(LIMITS.longText),
@@ -76,9 +85,25 @@ export const opportunityFormSchema = z.object({
 
 export type OpportunityFormValues = z.input<typeof opportunityFormSchema>;
 
+export const accountSchema = z.object({
+  email: clean(LIMITS.shortText),
+  verifiedAt: clean(40),
+  consentProcessing: z.boolean(),
+  consentResearch: z.boolean(),
+});
+
+export const ratingSchema = z.object({
+  id: clean(64),
+  topOpportunityId: clean(64),
+  score: z.number().int().min(1).max(5),
+  comment: clean(LIMITS.longText),
+  ratedAt: clean(40),
+});
+
 /** Request body accepted by POST /api/explain. */
 export const explainRequestSchema = z.object({
-  apiKey: z.string().min(8).max(200),
+  // Optional: omitted when the deployment supplies a sponsored key of its own.
+  apiKey: z.string().min(8).max(200).optional(),
   model: z
     .string()
     .max(60)
@@ -96,4 +121,14 @@ export function parseProfile(raw: unknown): StudentProfile {
 export function parseSubmittedOpportunities(raw: unknown): Opportunity[] {
   const result = z.array(opportunitySchema).max(200).safeParse(raw);
   return result.success ? (result.data as Opportunity[]) : [];
+}
+
+export function parseAccount(raw: unknown): Account | null {
+  const result = accountSchema.safeParse(raw);
+  return result.success ? result.data : null;
+}
+
+export function parseRatings(raw: unknown): ExplanationRating[] {
+  const result = z.array(ratingSchema).max(200).safeParse(raw);
+  return result.success ? result.data : [];
 }

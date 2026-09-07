@@ -19,11 +19,21 @@ const json = (body: unknown, status: number) =>
   });
 
 /**
- * Proxies one explanation request to DeepSeek using the caller's own API key.
+ * Reports whether this deployment has a sponsored key, so the Results tab knows whether to
+ * ask the student for one. It deliberately returns only a boolean -- never the key, its
+ * length, or any prefix of it.
+ */
+export async function GET() {
+  return json({ sponsored: Boolean(process.env.DEEPSEEK_API_KEY?.trim()) }, 200);
+}
+
+/**
+ * Proxies one explanation request to DeepSeek, preferring the deployment's sponsored key.
  *
- * The key is read from the request body, forwarded once, and never logged, cached or
- * persisted. Going through the server rather than calling DeepSeek from the browser
- * keeps the upstream response under our own CSP and avoids relying on their CORS policy.
+ * The key is forwarded once and never logged, cached or persisted. Going through the server
+ * rather than calling DeepSeek from the browser keeps the sponsored key out of the client
+ * entirely, keeps the upstream response under our own CSP, and avoids relying on their CORS
+ * policy.
  */
 export async function POST(request: Request) {
   const limit = rateLimit(clientKey(request));
@@ -51,7 +61,21 @@ export async function POST(request: Request) {
     // Deliberately generic: validation detail would describe the shape of the key field.
     return json({ error: "Invalid request." }, 400);
   }
-  const { apiKey, model, context } = parsed.data;
+  const { model, context } = parsed.data;
+
+  /*
+   * The sponsored key always wins when the deployment has one, so students never supply a
+   * key of their own and a caller cannot substitute one to bill elsewhere. The body key is
+   * only a fallback for deployments without sponsorship configured yet.
+   */
+  const sponsoredKey = process.env.DEEPSEEK_API_KEY?.trim();
+  const apiKey = sponsoredKey || parsed.data.apiKey?.trim();
+  if (!apiKey) {
+    return json(
+      { error: "AI explanations are not configured for this deployment yet." },
+      503,
+    );
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);

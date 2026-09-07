@@ -64,9 +64,22 @@ export function opportunityText(x: Opportunity): string {
   ].join(" ");
 }
 
+/**
+ * The programme-of-study terms fed into retrieval. Course titles are used rather than MIT
+ * course numbers because TF-IDF matches on words -- "6-3" shares nothing with an O*NET
+ * occupation description, but "Computer Science and Engineering" does. `degree` is the
+ * fallback for profiles saved before the major/minor dropdowns existed, and is what the
+ * scikit-learn parity fixtures use.
+ */
+export function programmeTerms(s: StudentProfile): string[] {
+  const terms = [s.major, s.minor].filter((t): t is string => Boolean(t && t.trim()));
+  if (terms.length) return terms;
+  return s.degree?.trim() ? [s.degree] : [];
+}
+
 export function profileToQuery(s: StudentProfile): string {
   return [
-    s.degree ?? "",
+    ...programmeTerms(s),
     ...(s.courses ?? []),
     ...(s.skills ?? []),
     ...(s.projects ?? []),

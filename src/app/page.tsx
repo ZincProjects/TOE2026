@@ -7,7 +7,7 @@ const STEPS = [
   {
     n: "01",
     title: "Fill in your profile",
-    body: "On the User tab, add your degree, courses, skills, projects, interests and the role you are aiming for. The more specific your skills, the sharper the match.",
+    body: "On the User tab, pick your major and minor, then add your courses, skills, projects, interests and the role you are aiming for. The more specific your skills, the sharper the match.",
   },
   {
     n: "02",
@@ -16,13 +16,13 @@ const STEPS = [
   },
   {
     n: "03",
-    title: "Plan your route",
-    body: "Each match carries a booth number. Work down your list from the top and you will have spoken to the highest-fit companies before the queues build.",
+    title: "Rate the reasoning",
+    body: "Every ranking comes with a written explanation of why those roles fit. Tell us how well it matched your own read of things — your ratings are what we use to measure whether TOE is actually getting it right.",
   },
   {
     n: "04",
-    title: "Ask for the reasoning",
-    body: "Optionally add your own DeepSeek key to have the ranking explained in plain language. The explanation is written from the retrieved evidence, and never changes the ranking.",
+    title: "Plan your route",
+    body: "Each match carries a booth number. Work down your list from the top and you will have spoken to the highest-fit companies before the queues build.",
   },
 ];
 
@@ -36,15 +36,23 @@ const FAIR_FACTS = [
 const FAQS = [
   {
     q: "Where does my profile go?",
-    a: "Nowhere. Your profile is stored in your own browser and the matching runs on your device. Nothing is uploaded unless you choose to generate an AI explanation, which sends only the ranking evidence.",
+    a: "Your profile is stored in your own browser and the matching runs on your device. Nothing is uploaded unless you generate an AI explanation, which sends only the ranking evidence — never your name or email.",
   },
   {
     q: "How is the match percentage calculated?",
     a: "Four weighted components: required skills (35%), preferred skills (15%), fit with the O*NET occupation the role maps onto (30%), and alignment with your stated career aspiration (20%).",
   },
   {
-    q: "Do I need an account?",
-    a: "No. There is no sign-up and no password. Open the site, fill in the User tab, and your matches are ready.",
+    q: "Do I need to bring an API key?",
+    a: "No. The explanation is generated for you — there is nothing to set up and nothing to pay for. The ranking itself is computed on your device and never depends on a language model.",
+  },
+  {
+    q: "Why do I have to sign in?",
+    a: "So that one person cannot flood the fair with dozens of fake profiles. Accurate profiles are what make the rankings — and the research we publish from them — worth anything.",
+  },
+  {
+    q: "What happens to my ratings?",
+    a: "If you consent, your ratings of the explanations are used in aggregate to evaluate how well TOE performs, and may appear in published research. Ratings are analysed anonymously and you can use TOE without opting in.",
   },
   {
     q: "I am a company, not a student.",
@@ -59,19 +67,25 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Hero */}
-      <section className="pt-10 pb-2 sm:pt-16 lg:pt-20">
+      {/* Hero — the TOE mark leads, so the project is the first thing anyone sees. */}
+      <section className="pt-10 pb-2 sm:pt-14 lg:pt-16">
         <p className="text-xs font-semibold tracking-[0.18em] text-rust uppercase">
           Career Fair 2026
         </p>
-        <h1 className="mt-4 font-display text-4xl leading-[1.05] font-semibold text-ink sm:text-5xl lg:text-6xl">
-          Walk in knowing
-          <br />
-          <span className="text-rust">who to talk to.</span>
+        <h1 className="mt-4">
+          <span className="block font-display text-7xl leading-[0.9] font-bold tracking-tight text-rust sm:text-8xl lg:text-9xl">
+            TOE
+          </span>
+          <span className="mt-3 block font-display text-2xl leading-tight font-semibold text-ink sm:text-3xl lg:text-4xl">
+            The Opportunity Engine
+          </span>
         </h1>
+        <p className="mt-4 max-w-xl font-display text-xl leading-snug text-ink-soft italic sm:text-2xl">
+          Walk in knowing who to talk to.
+        </p>
         <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-soft">
-          TOE — The Opportunity Engine — matches what you have actually studied and built against
-          every role on the fair floor, then tells you why each one fits.
+          TOE matches what you have actually studied and built against every role on the fair
+          floor, then tells you why each one fits.
         </p>
 
         <div className="mt-7 flex flex-wrap gap-3">
@@ -164,7 +178,7 @@ export default function HomePage() {
         </div>
       </Section>
 
-      <Section title="Questions">
+      <Section title="Frequently Asked Questions">
         <div className="grid gap-3 lg:grid-cols-2">
           {FAQS.map((faq) => (
             <details key={faq.q} className="card group p-5">

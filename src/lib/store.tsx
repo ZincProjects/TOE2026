@@ -1,12 +1,25 @@
 "use client";
 
 import { useCallback, useMemo, useSyncExternalStore } from "react";
-import { EMPTY_PROFILE, type Opportunity, type StudentProfile } from "./types";
-import { parseProfile, parseSubmittedOpportunities } from "./schemas";
+import {
+  EMPTY_PROFILE,
+  type Account,
+  type ExplanationRating,
+  type Opportunity,
+  type StudentProfile,
+} from "./types";
+import {
+  parseAccount,
+  parseProfile,
+  parseRatings,
+  parseSubmittedOpportunities,
+} from "./schemas";
 import { BASE_OPPORTUNITIES } from "./data";
 
 const PROFILE_KEY = "toe.profile.v1";
 const OPPORTUNITIES_KEY = "toe.submitted-opportunities.v1";
+const ACCOUNT_KEY = "toe.account.v1";
+const RATINGS_KEY = "toe.ratings.v1";
 /**
  * The DeepSeek key lives in sessionStorage, never localStorage: it is scoped to the
  * one tab and is discarded when that tab closes. It is never written to a cookie,
@@ -18,6 +31,8 @@ type State = {
   hydrated: boolean;
   profile: StudentProfile;
   submitted: Opportunity[];
+  account: Account | null;
+  ratings: ExplanationRating[];
   deepseekKey: string;
 };
 
@@ -31,6 +46,8 @@ const SERVER_SNAPSHOT: State = {
   hydrated: false,
   profile: EMPTY_PROFILE,
   submitted: [],
+  account: null,
+  ratings: [],
   deepseekKey: "",
 };
 
@@ -66,6 +83,14 @@ function persist(key: string, value: unknown) {
   }
 }
 
+function remove(key: string) {
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    /* Nothing to do if storage is unavailable. */
+  }
+}
+
 function hydrate() {
   let deepseekKey = "";
   try {
@@ -77,6 +102,8 @@ function hydrate() {
     hydrated: true,
     profile: readLocal(PROFILE_KEY, parseProfile, EMPTY_PROFILE),
     submitted: readLocal(OPPORTUNITIES_KEY, parseSubmittedOpportunities, []),
+    account: readLocal(ACCOUNT_KEY, parseAccount, null),
+    ratings: readLocal(RATINGS_KEY, parseRatings, []),
     deepseekKey,
   });
 }
@@ -87,6 +114,10 @@ function onStorageEvent(event: StorageEvent) {
     patch({ profile: readLocal(PROFILE_KEY, parseProfile, EMPTY_PROFILE) });
   } else if (event.key === OPPORTUNITIES_KEY) {
     patch({ submitted: readLocal(OPPORTUNITIES_KEY, parseSubmittedOpportunities, []) });
+  } else if (event.key === ACCOUNT_KEY) {
+    patch({ account: readLocal(ACCOUNT_KEY, parseAccount, null) });
+  } else if (event.key === RATINGS_KEY) {
+    patch({ ratings: readLocal(RATINGS_KEY, parseRatings, []) });
   }
 }
 
@@ -115,11 +146,7 @@ export function useStore() {
 
   const clearProfile = useCallback(() => {
     patch({ profile: EMPTY_PROFILE });
-    try {
-      window.localStorage.removeItem(PROFILE_KEY);
-    } catch {
-      /* Nothing to do if storage is unavailable. */
-    }
+    remove(PROFILE_KEY);
   }, []);
 
   const addOpportunity = useCallback((opportunity: Opportunity) => {
@@ -132,6 +159,24 @@ export function useStore() {
     const submitted = snapshot.submitted.filter((o) => o.opportunity_id !== id);
     patch({ submitted });
     persist(OPPORTUNITIES_KEY, submitted);
+  }, []);
+
+  const setAccount = useCallback((account: Account) => {
+    patch({ account });
+    persist(ACCOUNT_KEY, account);
+  }, []);
+
+  /** Signs out and clears the profile with it, so a shared device leaves nothing behind. */
+  const signOut = useCallback(() => {
+    patch({ account: null, profile: EMPTY_PROFILE });
+    remove(ACCOUNT_KEY);
+    remove(PROFILE_KEY);
+  }, []);
+
+  const addRating = useCallback((rating: ExplanationRating) => {
+    const ratings = [rating, ...snapshot.ratings];
+    patch({ ratings });
+    persist(RATINGS_KEY, ratings);
   }, []);
 
   const setDeepseekKey = useCallback((deepseekKey: string) => {
@@ -153,7 +198,8 @@ export function useStore() {
   const profileReady = useMemo(() => {
     const p = state.profile;
     return Boolean(
-      p.degree.trim() ||
+      p.major?.trim() ||
+        p.degree?.trim() ||
         p.aspiration.trim() ||
         p.skills.length ||
         p.courses.length ||
@@ -165,6 +211,8 @@ export function useStore() {
     hydrated: state.hydrated,
     profile: state.profile,
     submitted: state.submitted,
+    account: state.account,
+    ratings: state.ratings,
     deepseekKey: state.deepseekKey,
     opportunities,
     profileReady,
@@ -172,6 +220,9 @@ export function useStore() {
     clearProfile,
     addOpportunity,
     removeOpportunity,
+    setAccount,
+    signOut,
+    addRating,
     setDeepseekKey,
   };
 }

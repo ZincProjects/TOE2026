@@ -6,9 +6,10 @@ import { ChipInput, ListInput } from "@/components/ChipInput";
 import { ArrowRightIcon, CheckIcon } from "@/components/icons";
 import { Button, Card, Field, PageHeader, Section, inputClass } from "@/components/ui";
 import { useStore } from "@/lib/store";
-import { BASE_OPPORTUNITIES, OCCUPATIONS } from "@/lib/data";
+import { BASE_OPPORTUNITIES, MAJORS, MINORS, OCCUPATIONS } from "@/lib/data";
 import { LIMITS } from "@/lib/schemas";
 import { EMPTY_PROFILE, type StudentProfile } from "@/lib/types";
+import { AccessGate } from "./AccessGate";
 
 /** Drawn from the live catalogue so suggestions always reflect what employers ask for. */
 const SKILL_SUGGESTIONS = [
@@ -35,7 +36,7 @@ const INTEREST_SUGGESTIONS = [
 
 export default function UserPage() {
   const router = useRouter();
-  const { hydrated, profile, setProfile, clearProfile } = useStore();
+  const { hydrated, profile, setProfile, clearProfile, account, signOut } = useStore();
   const [draft, setDraft] = useState<StudentProfile | null>(null);
   const [saved, setSaved] = useState(false);
 
@@ -48,7 +49,7 @@ export default function UserPage() {
 
   const completeness = useMemo(() => {
     const checks = [
-      Boolean(value.degree.trim()),
+      Boolean(value.major.trim() || value.degree?.trim()),
       value.courses.length > 0,
       value.skills.length > 0,
       value.projects.length > 0,
@@ -59,7 +60,8 @@ export default function UserPage() {
   }, [value]);
 
   const canRank =
-    Boolean(value.degree.trim() || value.aspiration.trim()) || value.skills.length > 0;
+    Boolean(value.major.trim() || value.degree?.trim() || value.aspiration.trim()) ||
+    value.skills.length > 0;
 
   const save = () => {
     setProfile(value);
@@ -80,13 +82,26 @@ export default function UserPage() {
     );
   }
 
+  // Everything below the gate is only reachable once the access step has been completed.
+  if (!account) return <AccessGate />;
+
   return (
     <>
       <PageHeader
         eyebrow="Your profile"
         title="Tell TOE about yourself"
-        lede="Everything here stays in this browser. The more you fill in, the more precisely TOE can rank the opportunities on the floor — but degree and skills alone are enough to start."
+        lede="Everything here stays in this browser. The more you fill in, the more precisely TOE can rank the opportunities on the floor — but your major and a few skills are enough to start."
       />
+
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sage/25 bg-sage-tint/60 px-4 py-3">
+        <p className="text-xs text-ink-soft">
+          Signed in as <span className="font-semibold text-ink">{account.email}</span>
+          {account.consentResearch ? " · ratings shared for research" : " · ratings not shared"}
+        </p>
+        <Button variant="ghost" onClick={signOut} className="px-3 py-1.5 text-xs">
+          Sign out
+        </Button>
+      </div>
 
       {/* Completeness meter */}
       <Card className="flex flex-wrap items-center gap-4">
@@ -126,16 +141,40 @@ export default function UserPage() {
             />
           </Field>
 
-          <Field label="Degree" hint="Your programme of study." htmlFor="degree">
-            <input
-              id="degree"
-              type="text"
-              value={value.degree}
-              onChange={(e) => update("degree", e.target.value)}
-              placeholder="Computer Science"
-              maxLength={LIMITS.shortText}
+          <Field
+            label="Major"
+            hint="Your primary course. Picked from a list so everyone's answers stay comparable."
+            htmlFor="major"
+          >
+            <select
+              id="major"
+              value={value.major}
+              onChange={(e) => update("major", e.target.value)}
               className={inputClass}
-            />
+            >
+              <option value="">Select your major…</option>
+              {MAJORS.map((course) => (
+                <option key={course.code} value={course.title}>
+                  Course {course.code} — {course.title}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="Minor" hint="Optional." htmlFor="minor">
+            <select
+              id="minor"
+              value={value.minor}
+              onChange={(e) => update("minor", e.target.value)}
+              className={inputClass}
+            >
+              <option value="">No minor</option>
+              {MINORS.map((course) => (
+                <option key={course.code} value={course.title}>
+                  {course.title}
+                </option>
+              ))}
+            </select>
           </Field>
 
           <div className="sm:col-span-2">
