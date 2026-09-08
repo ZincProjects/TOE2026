@@ -21,6 +21,7 @@ import {
   Section,
   inputClass,
 } from "@/components/ui";
+import { FeedbackButton } from "@/components/FeedbackButton";
 import { useStore } from "@/lib/store";
 import { OCCUPATIONS } from "@/lib/data";
 import { RagEngine, WEIGHTS } from "@/lib/rag/engine";
@@ -312,6 +313,9 @@ export default function ResultsPage() {
           </details>
         </Card>
       </Section>
+
+      {/* Only reachable once a ranking has rendered above. */}
+      <FeedbackButton side="right" />
     </>
   );
 }

@@ -20,6 +20,7 @@ const PROFILE_KEY = "toe.profile.v1";
 const OPPORTUNITIES_KEY = "toe.submitted-opportunities.v1";
 const ACCOUNT_KEY = "toe.account.v1";
 const RATINGS_KEY = "toe.ratings.v1";
+const FEEDBACK_DISMISSED_KEY = "toe.feedback-dismissed.v1";
 /**
  * The DeepSeek key lives in sessionStorage, never localStorage: it is scoped to the
  * one tab and is discarded when that tab closes. It is never written to a cookie,
@@ -33,6 +34,8 @@ type State = {
   submitted: Opportunity[];
   account: Account | null;
   ratings: ExplanationRating[];
+  /** True once the student has opened or dismissed the feedback prompt. */
+  feedbackDismissed: boolean;
   deepseekKey: string;
 };
 
@@ -48,6 +51,7 @@ const SERVER_SNAPSHOT: State = {
   submitted: [],
   account: null,
   ratings: [],
+  feedbackDismissed: false,
   deepseekKey: "",
 };
 
@@ -104,6 +108,7 @@ function hydrate() {
     submitted: readLocal(OPPORTUNITIES_KEY, parseSubmittedOpportunities, []),
     account: readLocal(ACCOUNT_KEY, parseAccount, null),
     ratings: readLocal(RATINGS_KEY, parseRatings, []),
+    feedbackDismissed: readLocal(FEEDBACK_DISMISSED_KEY, (v) => v === true, false),
     deepseekKey,
   });
 }
@@ -118,6 +123,8 @@ function onStorageEvent(event: StorageEvent) {
     patch({ account: readLocal(ACCOUNT_KEY, parseAccount, null) });
   } else if (event.key === RATINGS_KEY) {
     patch({ ratings: readLocal(RATINGS_KEY, parseRatings, []) });
+  } else if (event.key === FEEDBACK_DISMISSED_KEY) {
+    patch({ feedbackDismissed: readLocal(FEEDBACK_DISMISSED_KEY, (v) => v === true, false) });
   }
 }
 
@@ -179,6 +186,11 @@ export function useStore() {
     persist(RATINGS_KEY, ratings);
   }, []);
 
+  const dismissFeedback = useCallback(() => {
+    patch({ feedbackDismissed: true });
+    persist(FEEDBACK_DISMISSED_KEY, true);
+  }, []);
+
   const setDeepseekKey = useCallback((deepseekKey: string) => {
     patch({ deepseekKey });
     try {
@@ -213,6 +225,7 @@ export function useStore() {
     submitted: state.submitted,
     account: state.account,
     ratings: state.ratings,
+    feedbackDismissed: state.feedbackDismissed,
     deepseekKey: state.deepseekKey,
     opportunities,
     profileReady,
@@ -223,6 +236,7 @@ export function useStore() {
     setAccount,
     signOut,
     addRating,
+    dismissFeedback,
     setDeepseekKey,
   };
 }

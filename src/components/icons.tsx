@@ -119,6 +119,26 @@ export function CheckIcon({ className }: IconProps) {
   );
 }
 
+export function ChatIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M20.4 14.2a2.6 2.6 0 0 1-2.6 2.6H9.2L4.8 20.2V6.2a2.6 2.6 0 0 1 2.6-2.6h10.4a2.6 2.6 0 0 1 2.6 2.6z" />
+      <path d="M9 8.9h7" />
+      <path d="M9 12.2h4.6" />
+    </svg>
+  );
+}
+
+export function ExternalLinkIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M13.4 5.2h5.4v5.4" />
+      <path d="M18.8 5.2 11 13" />
+      <path d="M17.6 13.9v4.3a1.4 1.4 0 0 1-1.4 1.4H5.8a1.4 1.4 0 0 1-1.4-1.4V7.8a1.4 1.4 0 0 1 1.4-1.4h4.3" />
+    </svg>
+  );
+}
+
 export function PinIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>

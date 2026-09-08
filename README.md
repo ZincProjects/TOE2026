@@ -107,6 +107,27 @@ sign-in.
 > Gathering them for publication needs a backend — `addRating` in `src/lib/store.tsx` is the one
 > place to change — along with the COUHES approval the research consent wording assumes.
 
+## Feedback form
+
+A floating **Give feedback** button appears on the Results tab once a ranking is on screen
+(never on the empty state, and never on the other tabs). It opens a Google Form in a new tab
+and can be dismissed; the dismissal is remembered so it does not nag on every visit.
+
+**It renders only when a form URL is configured**, so students are never shown a dead link.
+Set it in one of two places:
+
+- `NEXT_PUBLIC_FEEDBACK_FORM_URL` in the Vercel project (wins if both are set), or
+- `FEEDBACK_FORM_URL_FALLBACK` at the top of `src/lib/config.ts`.
+
+Use the form's **Send → link** URL (`https://docs.google.com/forms/d/e/.../viewform`). The value
+is parsed before use, so a non-http(s) value is rejected rather than becoming a live link. The
+form is linked, not embedded — the CSP's `default-src 'self'` would block an iframed form, and
+linking keeps Google out of the page entirely.
+
+Note this is separate from the 1-5 explanation rating on the Results tab: the rating measures
+one specific output and stays on the device, while the form collects open-ended feedback and
+goes straight to your Google account.
+
 ## Access step
 
 `src/app/user/AccessGate.tsx` gates the User tab behind a sign-in and consent step.
