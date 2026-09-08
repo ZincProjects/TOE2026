@@ -66,36 +66,62 @@ export function Card({
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 
+/**
+ * Border *width* is in the base and only the colour varies, so every variant has the same
+ * box and buttons sitting side by side line up exactly. (Putting `border-transparent` in the
+ * base instead would collide with the bordered variants, since Tailwind does not resolve
+ * conflicting utilities by source order.)
+ */
 const BUTTON_STYLES: Record<ButtonVariant, string> = {
-  primary: "bg-rust text-paper hover:bg-rust-deep disabled:hover:bg-rust",
-  secondary: "bg-paper text-ink border border-line hover:border-rust hover:text-rust",
-  ghost: "text-ink-soft hover:text-rust hover:bg-rust-tint",
-  danger: "bg-paper text-rust-deep border border-rust-tint hover:bg-rust-tint",
+  primary: "border-transparent bg-rust text-paper hover:bg-rust-deep disabled:hover:bg-rust",
+  secondary: "border-line bg-paper text-ink hover:border-rust hover:text-rust",
+  ghost: "border-transparent text-ink-soft hover:text-rust hover:bg-rust-tint",
+  danger: "border-rust-tint bg-paper text-rust-deep hover:bg-rust-tint",
+};
+
+/**
+ * Padding lives in the size map rather than the base string: Tailwind does not resolve
+ * conflicting utilities by source order, so a `px-4` passed through `className` would not
+ * reliably beat a `px-5` baked into the base.
+ */
+type ButtonSize = "default" | "compact" | "small";
+
+const BUTTON_SIZES: Record<ButtonSize, string> = {
+  default: "px-5 py-3",
+  compact: "px-3.5 py-2.5",
+  small: "px-3 py-1.5 text-xs",
 };
 
 const BUTTON_BASE =
-  "inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold " +
-  "transition-colors disabled:cursor-not-allowed disabled:opacity-55";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full border " +
+  "text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-55";
 
 export function Button({
   variant = "primary",
+  size = "default",
   className = "",
   ...props
-}: ComponentProps<"button"> & { variant?: ButtonVariant }) {
+}: ComponentProps<"button"> & { variant?: ButtonVariant; size?: ButtonSize }) {
   return (
     <button
       {...props}
-      className={`${BUTTON_BASE} ${BUTTON_STYLES[variant]} ${className}`}
+      className={`${BUTTON_BASE} ${BUTTON_SIZES[size]} ${BUTTON_STYLES[variant]} ${className}`}
     />
   );
 }
 
 export function ButtonLink({
   variant = "primary",
+  size = "default",
   className = "",
   ...props
-}: ComponentProps<typeof Link> & { variant?: ButtonVariant }) {
-  return <Link {...props} className={`${BUTTON_BASE} ${BUTTON_STYLES[variant]} ${className}`} />;
+}: ComponentProps<typeof Link> & { variant?: ButtonVariant; size?: ButtonSize }) {
+  return (
+    <Link
+      {...props}
+      className={`${BUTTON_BASE} ${BUTTON_SIZES[size]} ${BUTTON_STYLES[variant]} ${className}`}
+    />
+  );
 }
 
 type Tone = "rust" | "sage" | "amber" | "neutral";

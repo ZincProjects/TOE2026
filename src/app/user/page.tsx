@@ -98,7 +98,7 @@ export default function UserPage() {
           Signed in as <span className="font-semibold text-ink">{account.email}</span>
           {account.consentResearch ? " · ratings shared for research" : " · ratings not shared"}
         </p>
-        <Button variant="ghost" onClick={signOut} className="px-3 py-1.5 text-xs">
+        <Button variant="ghost" onClick={signOut} size="small">
           Sign out
         </Button>
       </div>
@@ -267,12 +267,12 @@ export default function UserPage() {
 
       {/* Actions */}
       <div className="sticky bottom-[calc(var(--dock-height)+0.5rem)] z-20 mt-8">
-        <div className="card flex flex-wrap items-center gap-3 p-4 shadow-[0_6px_24px_rgba(42,37,32,0.1)]">
-          <Button onClick={saveAndRank} disabled={!canRank} className="flex-1 sm:flex-none">
-            Save and see matches
+        <div className="card flex flex-wrap items-center gap-2 p-3 shadow-[0_6px_24px_rgba(42,37,32,0.1)] sm:gap-3 sm:p-4">
+          <Button onClick={saveAndRank} disabled={!canRank} size="compact">
+            See matches
             <ArrowRightIcon className="h-4 w-4" />
           </Button>
-          <Button onClick={save} variant="secondary" disabled={!canRank}>
+          <Button onClick={save} variant="secondary" disabled={!canRank} size="compact">
             {saved ? (
               <>
                 <CheckIcon className="h-4 w-4 text-sage" />
@@ -289,16 +289,18 @@ export default function UserPage() {
               setDraft(EMPTY_PROFILE);
               setSaved(false);
             }}
-            className="ml-auto px-4"
+            size="compact"
           >
             Clear
           </Button>
+          {/* Inside the card, so it sits on the card's background rather than over the
+              page content the sticky bar is floating above. */}
+          {!canRank ? (
+            <p className="w-full text-xs text-ink-soft">
+              Pick a major, add an aspiration, or add at least one skill to generate matches.
+            </p>
+          ) : null}
         </div>
-        {!canRank ? (
-          <p className="mt-2 px-1 text-xs text-ink-soft">
-            Add a degree, an aspiration or at least one skill to generate matches.
-          </p>
-        ) : null}
       </div>
     </>
   );

@@ -32,7 +32,7 @@ export function HomeStatus() {
           .
         </span>
       </p>
-      <ButtonLink href="/results" className="px-4 py-2 text-xs">
+      <ButtonLink href="/results" size="small">
         View matches
         <ArrowRightIcon className="h-3.5 w-3.5" />
       </ButtonLink>

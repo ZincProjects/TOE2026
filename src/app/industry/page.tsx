@@ -224,7 +224,7 @@ function OpportunityCard({
 
       {onRemove ? (
         <div className="mt-3 flex justify-end">
-          <Button variant="ghost" onClick={onRemove} className="px-3 py-1.5 text-xs">
+          <Button variant="ghost" onClick={onRemove} size="small">
             Remove
           </Button>
         </div>

@@ -290,7 +290,7 @@ export default function ResultsPage() {
                       <Button
                         variant="ghost"
                         onClick={() => setDeepseekKey("")}
-                        className="px-4 py-2"
+                        size="compact"
                       >
                         Clear key
                       </Button>
