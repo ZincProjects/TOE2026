@@ -53,8 +53,12 @@ body {
   background-color: var(--color-cream);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  /* Keeps content clear of the fixed tab dock on every breakpoint. */
-  padding-bottom: var(--dock-height);
+  /*
+   * Clears the fixed tab dock on every breakpoint, plus the floating feedback button that
+   * sits above it. That button cannot be dismissed, so without this the end of the page
+   * would sit permanently underneath it.
+   */
+  padding-bottom: calc(var(--dock-height) + 3.5rem);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }

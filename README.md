@@ -110,8 +110,9 @@ sign-in.
 ## Feedback form
 
 A floating **Give feedback** button appears on the Results tab once a ranking is on screen
-(never on the empty state, and never on the other tabs). It opens a Google Form in a new tab
-and can be dismissed; the dismissal is remembered so it does not nag on every visit.
+(never on the empty state, and never on the other tabs) and opens a Google Form in a new tab.
+It is deliberately permanent: there is no dismiss control, so it stays visible for the whole
+session. The page has extra bottom padding to match, so nothing ever sits underneath it.
 
 **It renders only when a form URL is configured**, so students are never shown a dead link.
 Set it in one of two places:
