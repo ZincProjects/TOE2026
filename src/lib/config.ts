@@ -16,7 +16,7 @@
  *   https://docs.google.com/forms/d/e/1FAIpQLSc.../viewform
  * ====================================================================================
  */
-const FEEDBACK_FORM_URL_FALLBACK = "";
+const FEEDBACK_FORM_URL_FALLBACK = "https://forms.gle/RHp8woMnPrxrnPcS7";
 
 /**
  * Returns the feedback form URL, or null when none is configured or the configured value
